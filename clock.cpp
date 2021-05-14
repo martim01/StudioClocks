@@ -57,6 +57,8 @@ AnalogueClock::AnalogueClock(wxWindow *parent, wxWindowID id, const wxPoint& pos
 
     wxWindow::Create(parent,id,pos,szInit,wxWANTS_CHARS, wxT("AnalogueClock"));
 
+    wxSetCursor(wxCURSOR_BLANK);
+
     m_timer.SetOwner(this);
     m_timer.Start(20);
 

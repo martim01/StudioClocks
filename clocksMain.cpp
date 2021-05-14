@@ -10,7 +10,7 @@
 #include "clocksMain.h"
 #include <wx/msgdlg.h>
 #include <wx/tokenzr.h>
-
+#include <wx/msgdlg.h>
 //(*InternalHeaders(clocksFrame)
 #include <wx/intl.h>
 #include <wx/string.h>
@@ -78,7 +78,7 @@ clocksFrame::clocksFrame(wxWindow* parent,wxWindowID id)
     ShowCursor(0);
     #endif // defined
 
-    Maximize();
+    SetSize(1920,1080);
 
 
     wxFileName fn(".", "clocks.xml");
@@ -103,6 +103,10 @@ void clocksFrame::LoadClocks(const wxFileName& fn)
                 LoadClock(pClockNode);
             }
         }
+    }
+    else
+    {
+        wxMessageBox("Could not load clocks");
     }
 }
 

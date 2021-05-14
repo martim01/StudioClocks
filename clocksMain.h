@@ -17,6 +17,9 @@
 #include "clock.h"
 #include <wx/xml/xml.h>
 #include <wx/filename.h>
+#include <wx/cursor.h>
+
+
 class clocksFrame: public wxFrame
 {
     public:
@@ -44,6 +47,7 @@ class clocksFrame: public wxFrame
         wxGridBagSizer* m_pSizer;
         //*)
 
+        wxCursor* m_pCursor;
         DECLARE_EVENT_TABLE()
 };
 
