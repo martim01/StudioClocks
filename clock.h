@@ -7,18 +7,18 @@
 #include <map>
 
 class wxBufferedPaintDC;
-class AnalogueClock : public wxWindow
+class StudioClock : public wxWindow
 {
     #ifdef WXSPAM
-    DECLARE_DYNAMIC_CLASS(AnalogueClock)
+    DECLARE_DYNAMIC_CLASS(StudioClock)
     #else
-    wxDECLARE_DYNAMIC_CLASS(AnalogueClock);
+    wxDECLARE_DYNAMIC_CLASS(StudioClock);
     #endif // WXSPAM
 public:
-    AnalogueClock();
-    virtual ~AnalogueClock();
+    StudioClock();
+    virtual ~StudioClock();
 
-    AnalogueClock(wxWindow *parent, wxWindowID id, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize);
+    StudioClock(wxWindow *parent, wxWindowID id, const wxPoint& pos = wxDefaultPosition, const wxSize& size = wxDefaultSize);
 
     void SetClockMode(int nMode);
 
@@ -41,21 +41,20 @@ public:
     void ShowHours(bool bShow, bool bShow24);
 
 
-    void SetTimezone(wxDateTime::TZ zone, const wxString& sLabel="");
-    void SetTimezone(const wxString& sTimeZone);
+    void SetTimezone(const wxString& sLabel, const wxTimeSpan& tsOffset, bool bOffsetFromUTC);
 
 
 
     int GetClockType() const {return m_nMode;}
 
-    const std::map<wxString, wxDateTime::TZ>& GetTimeZones() { return m_mTimeZone;}
 
     wxSize DoGetBestSize()
     {
         return wxSize(50,100);
     }
-    void SetRefreshRate(unsigned int nMilliseconds);
+    void SetRefreshType(int nType);
 
+    enum {SWEEP, TICK};
 
 
 
@@ -68,18 +67,17 @@ public:
     {
         Refresh();
     }
-    void OnTimer(wxTimerEvent& event)
-    {
-        Refresh();
-        //Update();
-    }
+    void OnTimer(wxTimerEvent& event);
 
 
+    void Tick();
 
 
     void PaintNormalClock(wxBufferedPaintDC& dc);
     void PaintStudioClock(wxBufferedPaintDC& dc);
     void PaintDigits(wxBufferedPaintDC& dc, float factor, const wxPoint& center, const wxDateTime& time, bool bShowHM);
+
+    wxDateTime GetClockTime();
 
     int m_nMode;
     wxTimer m_timer;
@@ -87,13 +85,14 @@ public:
     bool m_bShowSeconds;
     bool m_bShowHours;
     bool m_bShowHours24;
-    wxDateTime::TZ m_zone;
+
+    wxTimeSpan m_tsOffset;
     wxString m_sTimeZoneLabel;
+    bool m_bUTCOffset;
 
     std::array<wxColour, 6> m_arrActive;
     std::array<wxColour, 6> m_arrInActive;
 
-    std::map<wxString, wxDateTime::TZ> m_mTimeZone;
 
     wxColour m_clrAnalogueBack;
     wxColour m_clrAnalogueFront;
@@ -102,6 +101,12 @@ public:
     wxColour m_clrText;
     wxColour m_clrAnalogueHour;
     wxColour m_clrAnalogueHour24;
+
+    int m_nRefreshType;
+
+    wxDateTime m_dtLastUpdate;
+
+
 };
 
 

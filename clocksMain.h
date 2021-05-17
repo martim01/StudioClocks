@@ -13,6 +13,7 @@
 //(*Headers(clocksFrame)
 #include <wx/frame.h>
 #include <wx/gbsizer.h>
+#include <wx/menu.h>
 //*)
 #include "clock.h"
 #include <wx/xml/xml.h>
@@ -29,22 +30,29 @@ class clocksFrame: public wxFrame
 
         void LoadClocks(const wxFileName& fn);
         void LoadClock(wxXmlNode* pClockNode);
-        void AddClockToSizer(AnalogueClock* pClock, wxXmlNode* pPositionNode);
-        void SetClockColours(AnalogueClock* pClock, wxXmlNode* pColoursNode);
-        void SetClockOptions(AnalogueClock* pClock, wxXmlNode* pOptionsNode);
+        void AddClockToSizer(StudioClock* pClock, wxXmlNode* pPositionNode);
+        void SetClockColours(StudioClock* pClock, wxXmlNode* pColoursNode);
+        void SetClockOptions(StudioClock* pClock, wxXmlNode* pOptionsNode);
+        void SetClockTimeZone(StudioClock* pClock, wxXmlNode* pTimeZoneNode);
+        void SetupGrid(wxXmlNode* pGridNode);
         wxColour ExtractColour(const wxString& sColour);
     private:
 
         //(*Handlers(clocksFrame)
         void OnQuit(wxCommandEvent& event);
         void OnAbout(wxCommandEvent& event);
+        void OnClose(wxCloseEvent& event);
+        void OnRightUp(wxMouseEvent& event);
         //*)
 
         //(*Identifiers(clocksFrame)
+        static const long ID_MENUITEM_QUIT;
         //*)
 
         //(*Declarations(clocksFrame)
         wxGridBagSizer* m_pSizer;
+        wxMenu m_menuPopup;
+        wxMenuItem* m_pmiQuit;
         //*)
 
         wxCursor* m_pCursor;

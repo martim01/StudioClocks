@@ -11,6 +11,7 @@
 #include <wx/msgdlg.h>
 #include <wx/tokenzr.h>
 #include <wx/msgdlg.h>
+#include <wx/log.h>
 //(*InternalHeaders(clocksFrame)
 #include <wx/intl.h>
 #include <wx/string.h>
@@ -43,6 +44,7 @@ wxString wxbuildinfo(wxbuildinfoformat format)
 }
 
 //(*IdInit(clocksFrame)
+const long clocksFrame::ID_MENUITEM_QUIT = wxNewId();
 //*)
 
 BEGIN_EVENT_TABLE(clocksFrame,wxFrame)
@@ -57,20 +59,17 @@ clocksFrame::clocksFrame(wxWindow* parent,wxWindowID id)
     SetBackgroundColour(wxColour(0,0,0));
     m_pSizer = new wxGridBagSizer(0, 0);
     SetSizer(m_pSizer);
+    m_pmiQuit = new wxMenuItem((&m_menuPopup), ID_MENUITEM_QUIT, _("Quit"), wxEmptyString, wxITEM_NORMAL);
+    m_menuPopup.Append(m_pmiQuit);
     m_pSizer->Fit(this);
     m_pSizer->SetSizeHints(this);
+
+    Connect(ID_MENUITEM_QUIT,wxEVT_COMMAND_MENU_SELECTED,(wxObjectEventFunction)&clocksFrame::OnQuit);
+    Connect(wxID_ANY,wxEVT_CLOSE_WINDOW,(wxObjectEventFunction)&clocksFrame::OnClose);
+    Connect(wxEVT_RIGHT_UP,(wxObjectEventFunction)&clocksFrame::OnRightUp);
     //*)
 
-    m_pSizer->SetCols(20);
-    m_pSizer->SetRows(10);
-    for(size_t i = 0; i < m_pSizer->GetCols(); ++i)
-    {
-        m_pSizer->AddGrowableCol(i);
-    }
-    for(size_t i = 0; i < m_pSizer->GetRows(); ++i)
-    {
-        m_pSizer->AddGrowableRow(i);
-    }
+
 
     #if defined(__WXGTK__)
     wxSetCursor(wxCURSOR_BLANK);
@@ -78,15 +77,16 @@ clocksFrame::clocksFrame(wxWindow* parent,wxWindowID id)
     ShowCursor(0);
     #endif // defined
 
-    SetSize(1920,1080);
-
 
     wxFileName fn(".", "clocks.xml");
     LoadClocks(fn);
+
+    SetSize(1920,1080);
 }
 
 clocksFrame::~clocksFrame()
 {
+    wxLogDebug("~");
     //(*Destroy(clocksFrame)
     //*)
 }
@@ -96,6 +96,15 @@ void clocksFrame::LoadClocks(const wxFileName& fn)
     wxXmlDocument xml;
     if(xml.Load(fn.GetFullPath()))
     {
+        for(wxXmlNode* pGridNode = xml.GetRoot()->GetChildren(); pGridNode; pGridNode = pGridNode->GetNext())
+        {
+            if(pGridNode->GetName().CmpNoCase("layout") == 0)
+            {
+                SetupGrid(pGridNode);
+                break;
+            }
+        }
+
         for(wxXmlNode* pClockNode = xml.GetRoot()->GetChildren(); pClockNode; pClockNode = pClockNode->GetNext())
         {
             if(pClockNode->GetName().CmpNoCase("clock") == 0)
@@ -112,7 +121,7 @@ void clocksFrame::LoadClocks(const wxFileName& fn)
 
 void clocksFrame::LoadClock(wxXmlNode* pClockNode)
 {
-    AnalogueClock* pClock = new AnalogueClock(this,wxID_ANY,wxDefaultPosition,wxDefaultSize);
+    StudioClock* pClock = new StudioClock(this,wxID_ANY,wxDefaultPosition,wxDefaultSize);
 
     for(wxXmlNode* pNode = pClockNode->GetChildren(); pNode; pNode = pNode->GetNext())
     {
@@ -124,11 +133,11 @@ void clocksFrame::LoadClock(wxXmlNode* pClockNode)
         {
             if(pNode->GetNodeContent().CmpNoCase("studio") == 0)
             {
-                pClock->SetClockMode(AnalogueClock::STUDIO);
+                pClock->SetClockMode(StudioClock::STUDIO);
             }
             else
             {
-                pClock->SetClockMode(AnalogueClock::ANALOGUE);
+                pClock->SetClockMode(StudioClock::ANALOGUE);
             }
         }
         else if(pNode->GetName().CmpNoCase("colours") == 0)
@@ -137,7 +146,7 @@ void clocksFrame::LoadClock(wxXmlNode* pClockNode)
         }
         else if(pNode->GetName().CmpNoCase("timezone") == 0)
         {
-            pClock->SetTimezone(pNode->GetNodeContent().Upper());
+            SetClockTimeZone(pClock, pNode);
         }
         else if(pNode->GetName().CmpNoCase("options") == 0)
         {
@@ -146,7 +155,62 @@ void clocksFrame::LoadClock(wxXmlNode* pClockNode)
     }
 }
 
-void clocksFrame::AddClockToSizer(AnalogueClock* pClock, wxXmlNode* pPositionNode)
+void clocksFrame::SetClockTimeZone(StudioClock* pClock, wxXmlNode* pTimeZoneNode)
+{
+    wxString sLabel;
+    unsigned long nHours(0);
+    unsigned long nMinutes(0);
+    bool bUtc(false);
+
+    for(wxXmlNode* pNode = pTimeZoneNode->GetChildren(); pNode; pNode = pNode->GetNext())
+    {
+        if(pNode->GetName().CmpNoCase("label") == 0)
+        {
+            sLabel = pNode->GetNodeContent();
+        }
+        else if(pNode->GetName().CmpNoCase("offset") == 0)
+        {
+            wxLogDebug(pNode->GetNodeContent());
+
+            pNode->GetNodeContent().BeforeFirst(':').ToULong(&nHours);
+            pNode->GetNodeContent().AfterFirst(':').ToULong(&nMinutes);
+        }
+        else if(pNode->GetName().CmpNoCase("utc") == 0)
+        {
+            bUtc = (pNode->GetNodeContent().CmpNoCase("true") == 0);
+        }
+    }
+
+    pClock->SetTimezone(sLabel, wxTimeSpan(nHours, nMinutes), bUtc);
+
+}
+void clocksFrame::SetupGrid(wxXmlNode* pGridNode)
+{
+    for(wxXmlNode* pNode = pGridNode->GetChildren(); pNode; pNode = pNode->GetNext())
+    {
+        unsigned long nTemp;
+        if(pNode->GetName().CmpNoCase("rows") == 0 && pNode->GetNodeContent().ToULong(&nTemp))
+        {
+            m_pSizer->SetRows(nTemp);
+        }
+        if(pNode->GetName().CmpNoCase("cols") == 0 && pNode->GetNodeContent().ToULong(&nTemp))
+        {
+            m_pSizer->SetCols(nTemp);
+        }
+    }
+    wxLogDebug("Grid: rows=%d cols=%d", m_pSizer->GetRows(), m_pSizer->GetCols());
+
+    for(size_t i = 0; i < m_pSizer->GetCols(); ++i)
+    {
+        m_pSizer->AddGrowableCol(i);
+    }
+    for(size_t i = 0; i < m_pSizer->GetRows(); ++i)
+    {
+        m_pSizer->AddGrowableRow(i);
+    }
+}
+
+void clocksFrame::AddClockToSizer(StudioClock* pClock, wxXmlNode* pPositionNode)
 {
     wxGBPosition pos(0,0);
     wxGBSpan span(1,1);
@@ -185,10 +249,13 @@ void clocksFrame::AddClockToSizer(AnalogueClock* pClock, wxXmlNode* pPositionNod
             }
         }
     }
+    wxLogDebug("Add clock %d,%d,%d,%d", pos.GetCol(), pos.GetRow(), span.GetColspan(), span.GetRowspan());
     m_pSizer->Add(pClock, pos, span, wxALL|wxEXPAND, 2);
+
+    pClock->Connect(wxEVT_RIGHT_UP,(wxObjectEventFunction)&clocksFrame::OnRightUp,0,this);
 }
 
-void clocksFrame::SetClockColours(AnalogueClock* pClock, wxXmlNode* pColoursNode)
+void clocksFrame::SetClockColours(StudioClock* pClock, wxXmlNode* pColoursNode)
 {
     for(wxXmlNode* pNode = pColoursNode->GetChildren(); pNode; pNode = pNode->GetNext())
     {
@@ -258,16 +325,19 @@ wxColour clocksFrame::ExtractColour(const wxString& sColour)
 }
 
 
-void clocksFrame::SetClockOptions(AnalogueClock* pClock, wxXmlNode* pOptionsNode)
+void clocksFrame::SetClockOptions(StudioClock* pClock, wxXmlNode* pOptionsNode)
 {
     for(wxXmlNode* pNode = pOptionsNode->GetChildren(); pNode; pNode = pNode->GetNext())
     {
         if(pNode->GetName().CmpNoCase("refresh") == 0)
         {
-            unsigned long nRefresh;
-            if(pNode->GetNodeContent().ToULong(&nRefresh))
+            if(pNode->GetNodeContent().CmpNoCase("sweep") == 0)
             {
-                pClock->SetRefreshRate(nRefresh);
+                pClock->SetRefreshType(StudioClock::SWEEP);
+            }
+            else if(pNode->GetNodeContent().CmpNoCase("tick") == 0)
+            {
+                pClock->SetRefreshType(StudioClock::TICK);
             }
         }
         else if(pNode->GetName().CmpNoCase("hour") == 0)
@@ -306,4 +376,15 @@ void clocksFrame::OnAbout(wxCommandEvent& event)
 {
     wxString msg = wxbuildinfo(long_f);
     wxMessageBox(msg, _("Welcome to..."));
+}
+
+void clocksFrame::OnClose(wxCloseEvent& event)
+{
+    wxLogDebug("Close");
+    event.Skip();
+}
+
+void clocksFrame::OnRightUp(wxMouseEvent& event)
+{
+    PopupMenu(&m_menuPopup);
 }

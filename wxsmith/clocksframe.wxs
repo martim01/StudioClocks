@@ -3,6 +3,14 @@
 	<object class="wxFrame" name="clocksFrame">
 		<bg>#000000</bg>
 		<style>wxRESIZE_BORDER|wxNO_BORDER</style>
+		<handler function="OnClose" entry="EVT_CLOSE" />
+		<handler function="OnRightUp" entry="EVT_RIGHT_UP" />
 		<object class="wxGridBagSizer" variable="m_pSizer" member="yes" />
+		<object class="wxMenu" variable="m_menuPopup" member="yes">
+			<object class="wxMenuItem" name="ID_MENUITEM_QUIT" variable="m_pmiQuit" member="yes">
+				<label>Quit</label>
+				<handler function="OnQuit" entry="EVT_MENU" />
+			</object>
+		</object>
 	</object>
 </wxsmith>

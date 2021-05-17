@@ -6,46 +6,45 @@
 
 using namespace std;
 
-// AnalogueClock
+// StudioClock
 #ifdef WXSPAM
-IMPLEMENT_DYNAMIC_CLASS(AnalogueClock, wxWindow)
+IMPLEMENT_DYNAMIC_CLASS(StudioClock, wxWindow)
 #else
-wxIMPLEMENT_DYNAMIC_CLASS(AnalogueClock, wxWindow);
+wxIMPLEMENT_DYNAMIC_CLASS(StudioClock, wxWindow);
 #endif // WXSPAM
 
 
 
 
 
-AnalogueClock::AnalogueClock()
+StudioClock::StudioClock()
     : wxWindow()
 {
 
     m_timer.SetOwner(this);
-    m_timer.Start(20);
 
-    Connect(wxEVT_PAINT, (wxObjectEventFunction)&AnalogueClock::OnPaint);
-    Connect(wxEVT_SIZE, (wxObjectEventFunction)&AnalogueClock::OnSize);
-    Connect(wxID_ANY, wxEVT_TIMER,(wxObjectEventFunction)&AnalogueClock::OnTimer);
+    Connect(wxEVT_PAINT, (wxObjectEventFunction)&StudioClock::OnPaint);
+    Connect(wxEVT_SIZE, (wxObjectEventFunction)&StudioClock::OnSize);
+    Connect(wxID_ANY, wxEVT_TIMER,(wxObjectEventFunction)&StudioClock::OnTimer);
 
 
 }
 
-AnalogueClock::AnalogueClock(wxWindow *parent, wxWindowID id, const wxPoint& pos, const wxSize& size) :
+StudioClock::StudioClock(wxWindow *parent, wxWindowID id, const wxPoint& pos, const wxSize& size) :
     wxWindow(),
     m_nMode(ANALOGUE),
     m_bShowTimezone(false),
     m_bShowSeconds(false),
     m_bShowHours(false),
     m_bShowHours24(false),
-    m_zone(wxDateTime::Local),
     m_clrAnalogueBack(*wxBLACK),
     m_clrAnalogueFront(*wxWHITE),
     m_clrAnalogueHands(*wxWHITE),
     m_clrAnalogueSecondHand(*wxRED),
     m_clrText(wxColour(220,220,220)),
     m_clrAnalogueHour(wxColour(240,240,240)),
-    m_clrAnalogueHour24(wxColour(200,0,0))
+    m_clrAnalogueHour24(wxColour(200,0,0)),
+    m_nRefreshType(SWEEP)
 {
     wxSize szInit(size);
     wxSize bestSize = DoGetBestSize();
@@ -55,15 +54,18 @@ AnalogueClock::AnalogueClock(wxWindow *parent, wxWindowID id, const wxPoint& pos
         szInit.SetHeight(bestSize.y);
 
 
-    wxWindow::Create(parent,id,pos,szInit,wxWANTS_CHARS, wxT("AnalogueClock"));
+    wxWindow::Create(parent,id,pos,szInit,wxWANTS_CHARS, wxT("StudioClock"));
 
     wxSetCursor(wxCURSOR_BLANK);
 
     m_timer.SetOwner(this);
-    m_timer.Start(20);
 
     SetMinSize(size);
+
     m_sTimeZoneLabel = "LOCAL";
+    m_bUTCOffset = false;
+    m_tsOffset = wxTimeSpan(0);
+
 
     SetBackgroundStyle(wxBG_STYLE_CUSTOM);
 
@@ -71,73 +73,20 @@ AnalogueClock::AnalogueClock(wxWindow *parent, wxWindowID id, const wxPoint& pos
     SetStudioColourGAR();
 
 
-    Connect(wxEVT_PAINT, (wxObjectEventFunction)&AnalogueClock::OnPaint);
-    Connect(wxEVT_SIZE, (wxObjectEventFunction)&AnalogueClock::OnSize);
-    Connect(wxID_ANY, wxEVT_TIMER,(wxObjectEventFunction)&AnalogueClock::OnTimer);
+    Connect(wxEVT_PAINT, (wxObjectEventFunction)&StudioClock::OnPaint);
+    Connect(wxEVT_SIZE, (wxObjectEventFunction)&StudioClock::OnSize);
+    Connect(wxID_ANY, wxEVT_TIMER,(wxObjectEventFunction)&StudioClock::OnTimer);
 
 
-    m_mTimeZone["LOCAL"] = wxDateTime::Local;
-    m_mTimeZone["WET"] = wxDateTime::WET;
-    m_mTimeZone["WEST"] = wxDateTime::WEST;
-    m_mTimeZone["CET"] = wxDateTime::CET;
-    m_mTimeZone["CEST"] = wxDateTime::CEST;
-    m_mTimeZone["EET"] = wxDateTime::EET;
-    m_mTimeZone["EEST"] = wxDateTime::EEST;
-    m_mTimeZone["MSK"] = wxDateTime::MSK;
-    m_mTimeZone["MSD"] = wxDateTime::MSD;
-    m_mTimeZone["AST"] = wxDateTime::AST;
-    m_mTimeZone["ADT"] = wxDateTime::ADT;
-    m_mTimeZone["EDT"] = wxDateTime::EDT;
-    m_mTimeZone["CST"] = wxDateTime::CST;
-    m_mTimeZone["MST"] = wxDateTime::MST;
-    m_mTimeZone["MDT"] = wxDateTime::MDT;
-    m_mTimeZone["PST"] = wxDateTime::PST;
-    m_mTimeZone["PDT"] = wxDateTime::PDT;
-    m_mTimeZone["HST"] = wxDateTime::HST;
-    m_mTimeZone["AKST"] = wxDateTime::AKST;
-    m_mTimeZone["AKDT"] = wxDateTime::AKDT;
-    m_mTimeZone["A_WST"] = wxDateTime::A_WST;
-    m_mTimeZone["A_CST"] = wxDateTime::A_CST;
-    m_mTimeZone["A_EST"] = wxDateTime::A_EST;
-    m_mTimeZone["A_EEST"] = wxDateTime::A_ESST;
-    m_mTimeZone["NZST"] = wxDateTime::NZST;
-    m_mTimeZone["NZDT"] = wxDateTime::NZDT;
-    m_mTimeZone["UTC"] = wxDateTime::UTC;
-    m_mTimeZone["GMT_12"] = wxDateTime::GMT_12;
-    m_mTimeZone["GMT_11"] = wxDateTime::GMT_11;
-    m_mTimeZone["GMT_10"] = wxDateTime::GMT_10;
-    m_mTimeZone["GMT_9"] = wxDateTime::GMT_9;
-    m_mTimeZone["GMT_8"] = wxDateTime::GMT_8;
-    m_mTimeZone["GMT_7"] = wxDateTime::GMT_7;
-    m_mTimeZone["GMT_6"] = wxDateTime::GMT_6;
-    m_mTimeZone["GMT_5"] = wxDateTime::GMT_5;
-    m_mTimeZone["GMT_4"] = wxDateTime::GMT_4;
-    m_mTimeZone["GMT_3"] = wxDateTime::GMT_3;
-    m_mTimeZone["GMT_2"] = wxDateTime::GMT_2;
-    m_mTimeZone["GMT_1"] = wxDateTime::GMT_1;
-    m_mTimeZone["GMT0"] = wxDateTime::GMT0;
-    m_mTimeZone["GMT1"] = wxDateTime::GMT1;
-    m_mTimeZone["GMT2"] = wxDateTime::GMT2;
-    m_mTimeZone["GMT3"] = wxDateTime::GMT3;
-    m_mTimeZone["GMT4"] = wxDateTime::GMT4;
-    m_mTimeZone["GMT5"] = wxDateTime::GMT5;
-    m_mTimeZone["GMT6"] = wxDateTime::GMT6;
-    m_mTimeZone["GMT7"] = wxDateTime::GMT7;
-    m_mTimeZone["GMT8"] = wxDateTime::GMT8;
-    m_mTimeZone["GMT9"] = wxDateTime::GMT9;
-    m_mTimeZone["GMT10"] = wxDateTime::GMT10;
-    m_mTimeZone["GMT11"] = wxDateTime::GMT11;
-    m_mTimeZone["GMT12"] = wxDateTime::GMT12;
-    m_mTimeZone["GMT13"] = wxDateTime::GMT13;
-
+    SetRefreshType(m_nRefreshType);
 }
 
-AnalogueClock::~AnalogueClock()
+StudioClock::~StudioClock()
 {
 }
 
 
-void AnalogueClock::OnPaint(wxPaintEvent& event)
+void StudioClock::OnPaint(wxPaintEvent& event)
 {
     wxBufferedPaintDC dc(this);
 
@@ -152,7 +101,19 @@ void AnalogueClock::OnPaint(wxPaintEvent& event)
     }
 }
 
-void AnalogueClock::PaintNormalClock(wxBufferedPaintDC& dc)
+wxDateTime StudioClock::GetClockTime()
+{
+    wxDateTime dtNow = wxDateTime::UNow();
+    if(m_bUTCOffset)
+    {
+        dtNow = dtNow.ToUTC(false);
+        //wxLogDebug("%s %s", dtNow.ToUTC(false).Format("%H").c_str(), dtNow.ToUTC(true).Format("%H").c_str());
+    }
+    dtNow += m_tsOffset;
+    return dtNow;
+}
+
+void StudioClock::PaintNormalClock(wxBufferedPaintDC& dc)
 {
 
     wxSize sz = GetClientSize();
@@ -184,7 +145,7 @@ void AnalogueClock::PaintNormalClock(wxBufferedPaintDC& dc)
     float r_inner_min = radius - 7 * factor;
     float r_inner_hour = radius - 10 * factor;
     float r_inner_text = radius - 15 * factor;
-    float r_inner_text24 = radius - 22 * factor;
+    float r_inner_text24 = radius - 23 * factor;
     int linewidth = 1;
     for (int r = 1; r <= 60; r ++)
     {
@@ -219,7 +180,7 @@ void AnalogueClock::PaintNormalClock(wxBufferedPaintDC& dc)
                 wxString hour24;
                 hour24.Printf("%i", ((r / 5)+12)%24);
 
-                dc.SetFont(wxFont(static_cast<int>(5 * factor), wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD, false, "tahoma", wxFONTENCODING_DEFAULT));
+                dc.SetFont(wxFont(static_cast<int>(6 * factor), wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD, false, "tahoma", wxFONTENCODING_DEFAULT));
 
                 // calculate the size of the text and paint it in the window
                 wxCoord w = 0, h = 0;
@@ -231,7 +192,7 @@ void AnalogueClock::PaintNormalClock(wxBufferedPaintDC& dc)
                 {
                     dc.SetTextForeground(m_clrAnalogueHour24);
 
-                    dc.SetFont(wxFont(static_cast<int>(3 * factor), wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD, false, "tahoma", wxFONTENCODING_DEFAULT));
+                    dc.SetFont(wxFont(static_cast<int>(4 * factor), wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD, false, "tahoma", wxFONTENCODING_DEFAULT));
                     dc.GetTextExtent(hour24, &w, &h);
                     text_pos = wxPoint(static_cast<int>(r_inner_text24 * s - w / 2), static_cast<int>(r_inner_text24 * c - h / 2));
                     dc.DrawText(hour24, center + text_pos);
@@ -242,11 +203,8 @@ void AnalogueClock::PaintNormalClock(wxBufferedPaintDC& dc)
     }
 
     // draw hour, minute and second hand of the clock
-    wxDateTime time = wxDateTime::UNow();
-    if(m_zone != wxDateTime::Local)
-    {
-        time.MakeTimezone(m_zone, false);
-    }
+    wxDateTime time = GetClockTime();
+
 
     PaintDigits(dc, factor, center, time, false);
 
@@ -296,7 +254,7 @@ void AnalogueClock::PaintNormalClock(wxBufferedPaintDC& dc)
 
 
 
-void AnalogueClock::PaintStudioClock(wxBufferedPaintDC& dc)
+void StudioClock::PaintStudioClock(wxBufferedPaintDC& dc)
 {
     // Get window dimensions
     wxSize sz = GetClientSize();
@@ -321,11 +279,8 @@ void AnalogueClock::PaintStudioClock(wxBufferedPaintDC& dc)
     int linewidth = 1;
 
     // draw hour, minute and second hand of the clock
-    wxDateTime time = wxDateTime::UNow();
-    if(m_zone != wxDateTime::Local)
-    {
-        time.MakeTimezone(m_zone, false);
-    }
+    wxDateTime time = GetClockTime();
+
     int nHour = time.GetHour();
     int nMin = time.GetMinute();
     int nSec = time.GetSecond();
@@ -362,7 +317,7 @@ void AnalogueClock::PaintStudioClock(wxBufferedPaintDC& dc)
     PaintDigits(dc, factor, center, time, true);
 }
 
-void AnalogueClock::PaintDigits(wxBufferedPaintDC& dc, float factor, const wxPoint& center, const wxDateTime& time, bool bShowHM)
+void StudioClock::PaintDigits(wxBufferedPaintDC& dc, float factor, const wxPoint& center, const wxDateTime& time, bool bShowHM)
 {
     dc.SetTextForeground(m_clrText);
 
@@ -395,13 +350,13 @@ void AnalogueClock::PaintDigits(wxBufferedPaintDC& dc, float factor, const wxPoi
     }
 }
 
-void AnalogueClock::SetClockMode(int nMode)
+void StudioClock::SetClockMode(int nMode)
 {
     m_nMode = nMode;
     Refresh();
 }
 
-void AnalogueClock::SetStudioColour(unsigned int nSection, const wxColour& clrActive, const wxColour& clrInActive)
+void StudioClock::SetStudioColour(unsigned int nSection, const wxColour& clrActive, const wxColour& clrInActive)
 {
     if(nSection < 6)
     {
@@ -411,118 +366,134 @@ void AnalogueClock::SetStudioColour(unsigned int nSection, const wxColour& clrAc
     Refresh();
 }
 
-void AnalogueClock::SetStudioColour(unsigned int nSection, const wxColour& clrActive)
+void StudioClock::SetStudioColour(unsigned int nSection, const wxColour& clrActive)
 {
     SetStudioColour(nSection, clrActive, wxColour(std::max(0,clrActive.Red()/3), std::max(0,clrActive.Green()/3), std::max(0,clrActive.Blue()/3)));
 }
 
-void AnalogueClock::SetRefreshRate(unsigned int nMilliseconds)
-{
-    m_timer.Stop();
-    m_timer.Start(nMilliseconds);
-}
 
-void AnalogueClock::SetStudioColourGAR()
+void StudioClock::SetStudioColourGAR()
 {
      m_arrActive = {wxColour(48,255,48), wxColour(255,166,77), wxColour(255,61,1),  wxColour(48,255,48), wxColour(255,166,77), wxColour(255,61,1)};
     m_arrInActive = {wxColour(24,64,24),wxColour(64,41,38), wxColour(64,31,31), wxColour(24,64,24),wxColour(64,41,38), wxColour(64,31,31)};
     Refresh();
 }
 
-void AnalogueClock::SetStudioColourDefault()
+void StudioClock::SetStudioColourDefault()
 {
     m_arrActive = {wxColour(255,166,77), wxColour(255,255,51), wxColour(48,255,48), wxColour(255,61,1),  wxColour(255,61,61), wxColour(255,61,61)};
     m_arrInActive = {wxColour(64,41,38), wxColour(64,64,26), wxColour(24,64,24), wxColour(64,31,31),  wxColour(64,31,31), wxColour(64,31,31)};
     Refresh();
 }
 
-void AnalogueClock::SetStudioColourWhite()
+void StudioClock::SetStudioColourWhite()
 {
     m_arrActive = {*wxWHITE, *wxWHITE,*wxWHITE,*wxWHITE,*wxWHITE,*wxWHITE};
     m_arrInActive = {wxColour(60,60,60),wxColour(60,60,60),wxColour(60,60,60),wxColour(60,60,60),wxColour(60,60,60),wxColour(60,60,60)};
     Refresh();
 }
 
-void AnalogueClock::ShowTimezone(bool bShow)
+void StudioClock::ShowTimezone(bool bShow)
 {
     m_bShowTimezone = bShow;
     Refresh();
 }
 
-void AnalogueClock::ShowSeconds(bool bShow)
+void StudioClock::ShowSeconds(bool bShow)
 {
     m_bShowSeconds = bShow;
     Refresh();
 }
 
-void AnalogueClock::ShowHours(bool bShow, bool bShow24)
+void StudioClock::ShowHours(bool bShow, bool bShow24)
 {
     m_bShowHours = bShow;
     m_bShowHours24 = bShow24;
 }
 
-void AnalogueClock::SetTimezone(wxDateTime::TZ zone, const wxString& sLabel)
+void StudioClock::SetTimezone(const wxString& sTimeZone, const wxTimeSpan& tsOffset, bool bOffsetFromUTC)
 {
-    m_zone = zone;
-    if(sLabel.empty())
-    {
-    }
-    else
-    {
-        m_sTimeZoneLabel = sLabel;
-    }
+    m_sTimeZoneLabel = sTimeZone;
+    m_tsOffset = tsOffset;
+    m_bUTCOffset = bOffsetFromUTC;
     Refresh();
 }
 
-void AnalogueClock::SetTimezone(const wxString& sTimeZone)
-{
-    auto itTz = m_mTimeZone.find(sTimeZone);
-    if(itTz != m_mTimeZone.end())
-    {
-        m_sTimeZoneLabel = sTimeZone;
-        m_zone = itTz->second;
-        Refresh();
-    }
-}
-
-void AnalogueClock::SetAnalogueColourBack(const wxColour& clr)
+void StudioClock::SetAnalogueColourBack(const wxColour& clr)
 {
     m_clrAnalogueBack = clr;
     Refresh();
 }
 
-void AnalogueClock::SetAnalogueColourFront(const wxColour& clr)
+void StudioClock::SetAnalogueColourFront(const wxColour& clr)
 {
     m_clrAnalogueFront = clr;
     Refresh();
 }
 
-void AnalogueClock::SetTextColour(const wxColour& clr)
+void StudioClock::SetTextColour(const wxColour& clr)
 {
     m_clrText= clr;
     Refresh();
 }
 
-void AnalogueClock::SetAnalogueHourColour(const wxColour& clr)
+void StudioClock::SetAnalogueHourColour(const wxColour& clr)
 {
     m_clrAnalogueHour = clr;
     Refresh();
 }
 
-void AnalogueClock::SetAnalogueHour24Colour(const wxColour& clr)
+void StudioClock::SetAnalogueHour24Colour(const wxColour& clr)
 {
     m_clrAnalogueHour24 = clr;
     Refresh();
 }
 
-void AnalogueClock::SetAnalogueColourHands(const wxColour& clr)
+void StudioClock::SetAnalogueColourHands(const wxColour& clr)
 {
     m_clrAnalogueHands = clr;
     Refresh();
 }
 
-void AnalogueClock::SetAnalogueColourSecondHand(const wxColour& clr)
+void StudioClock::SetAnalogueColourSecondHand(const wxColour& clr)
 {
     m_clrAnalogueSecondHand = clr;
     Refresh();
+}
+
+void StudioClock::OnTimer(wxTimerEvent& event)
+{
+    Refresh();
+    if(m_nMode == STUDIO || m_nRefreshType == TICK)
+    {
+        Update();
+    }
+
+    Tick();
+}
+
+void StudioClock::SetRefreshType(int nType)
+{
+    m_nRefreshType = nType;
+
+
+    if(m_timer.IsRunning())
+    {
+        m_timer.Stop();
+    }
+    Tick();
+}
+
+void StudioClock::Tick()
+{
+    unsigned long nMilliseconds = wxDateTime::UNow().GetMillisecond();
+    if(m_nRefreshType == TICK || m_nMode == STUDIO)
+    {
+        m_timer.Start(1000-nMilliseconds);
+    }
+    else
+    {
+        nMilliseconds %= 50;
+        m_timer.Start(50-nMilliseconds);
+    }
 }
