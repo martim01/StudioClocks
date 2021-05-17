@@ -172,33 +172,35 @@ void StudioClock::PaintNormalClock(wxBufferedPaintDC& dc)
             // paint value of the hour
             if(m_bShowHours)
             {
-                dc.SetTextForeground(m_clrAnalogueHour);
-
-                wxString hour;
-                hour.Printf("%i", r / 5);
-
-                wxString hour24;
-                hour24.Printf("%i", ((r / 5)+12)%24);
-
-                dc.SetFont(wxFont(static_cast<int>(6 * factor), wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD, false, "tahoma", wxFONTENCODING_DEFAULT));
-
-                // calculate the size of the text and paint it in the window
                 wxCoord w = 0, h = 0;
-                dc.GetTextExtent(hour, &w, &h);
-                wxPoint text_pos = wxPoint(static_cast<int>(r_inner_text * s - w / 2), static_cast<int>(r_inner_text * c - h / 2));
-                dc.DrawText(hour, center + text_pos);
 
                 if(m_bShowHours24)
                 {
+                    wxString hour24;
+                    hour24.Printf("%i", ((r / 5)+12)%24);
+
                     dc.SetTextForeground(m_clrAnalogueHour24);
 
                     dc.SetFont(wxFont(static_cast<int>(4 * factor), wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD, false, "tahoma", wxFONTENCODING_DEFAULT));
                     dc.GetTextExtent(hour24, &w, &h);
-                    text_pos = wxPoint(static_cast<int>(r_inner_text24 * s - w / 2), static_cast<int>(r_inner_text24 * c - h / 2));
+                    wxPoint text_pos = wxPoint(static_cast<int>(r_inner_text24 * s - w / 2), static_cast<int>(r_inner_text24 * c - h / 2));
                     dc.DrawText(hour24, center + text_pos);
                 }
+
+                dc.SetTextForeground(m_clrAnalogueHour);
+
+                dc.SetFont(wxFont(static_cast<int>(6 * factor), wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD, false, "tahoma", wxFONTENCODING_DEFAULT));
+
+                wxString hour;
+                hour.Printf("%i", r / 5);
+
+                dc.GetTextExtent(hour, &w, &h);
+                wxPoint text_pos = wxPoint(static_cast<int>(r_inner_text * s - w / 2), static_cast<int>(r_inner_text * c - h / 2));
+                dc.DrawText(hour, center + text_pos);
+
+
             }
-            //dc.DrawRotatedText(hour, center.x + text_pos.x, center.y + text_pos.y, (60-r)/60.0*360);  // cool :)
+
         }
     }
 

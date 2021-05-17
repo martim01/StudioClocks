@@ -21,7 +21,7 @@
 			<hour24>#ff0000</hour24>
 		</colours>
 		<options>
-			<refresh>sweep</refresh>
+			<refresh>tick</refresh>
 			<hour>24</hour>
 			<text>true</text>
 		</options>

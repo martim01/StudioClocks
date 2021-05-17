@@ -6,7 +6,7 @@
 	<wx/dcmemory.h>
 	<wx/log.h>
 
-1621010116 /home/pi/StudioClocks/clock.h
+1621260366 /home/pi/StudioClocks/clock.h
 	<wx/window.h>
 	<vector>
 	<wx/bitmap.h>
@@ -881,9 +881,10 @@
 
 1546487181 /usr/include/wx-3.0/wx/gtk/app.h
 
-1621010617 /home/pi/StudioClocks/clocksMain.h
+1621260366 /home/pi/StudioClocks/clocksMain.h
 	<wx/frame.h>
 	<wx/gbsizer.h>
+	<wx/menu.h>
 	"clock.h"
 	<wx/xml/xml.h>
 	<wx/filename.h>
@@ -1024,11 +1025,12 @@
 	"wx/strconv.h"
 	"wx/fontenc.h"
 
-1621010798 source:/home/pi/StudioClocks/clocksMain.cpp
+1621260366 source:/home/pi/StudioClocks/clocksMain.cpp
 	"clocksMain.h"
 	<wx/msgdlg.h>
 	<wx/tokenzr.h>
 	<wx/msgdlg.h>
+	<wx/log.h>
 	<wx/intl.h>
 	<wx/string.h>
 
@@ -3084,4 +3086,35 @@
 	"wx/accel.h"
 	"wx/list.h"
 	"wx/dynarray.h"
+
+1546487181 /usr/include/wx-3.0/wx/menu.h
+	"wx/defs.h"
+	"wx/list.h"
+	"wx/window.h"
+	"wx/menuitem.h"
+	"wx/univ/menu.h"
+	"wx/msw/menu.h"
+	"wx/motif/menu.h"
+	"wx/gtk/menu.h"
+	"wx/gtk1/menu.h"
+	"wx/osx/menu.h"
+	"wx/cocoa/menu.h"
+	"wx/os2/menu.h"
+
+1546487181 /usr/include/wx-3.0/wx/menuitem.h
+	"wx/defs.h"
+	"wx/object.h"
+	"wx/univ/menuitem.h"
+	"wx/msw/menuitem.h"
+	"wx/motif/menuitem.h"
+	"wx/gtk/menuitem.h"
+	"wx/gtk1/menuitem.h"
+	"wx/osx/menuitem.h"
+	"wx/cocoa/menuitem.h"
+	"wx/os2/menuitem.h"
+
+1546487181 /usr/include/wx-3.0/wx/gtk/menuitem.h
+	"wx/bitmap.h"
+
+1546487181 /usr/include/wx-3.0/wx/gtk/menu.h
 
