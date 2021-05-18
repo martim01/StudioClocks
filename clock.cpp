@@ -277,7 +277,7 @@ void StudioClock::PaintStudioClock(wxBufferedPaintDC& dc)
     float pi = 3.141592654;
     float r_inner_min = radius - 7 * factor;
     float r_inner_hour = radius - 10 * factor;
-
+    float r_outer = radius - 5 * factor;
     // draw hour, minute and second hand of the clock
     wxDateTime time = GetClockTime();
 

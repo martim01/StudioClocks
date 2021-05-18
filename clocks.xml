@@ -41,13 +41,12 @@
 		<type>studio</type>
 		<colours>
 			<text>#ffffff</text>
-			<sextant pos="0">#00ff00</sextant>
-			<sextant pos="1">#00ff00</sextant>
-			<sextant pos="2">#ffff00</sextant>
-			<sextant pos="3">#ffff00</sextant>
-			<sextant pos="4">#ff8800</sextant>
-			<sextant pos="5">#ff8800</sextant>
-			<sextant pos="6">#ff0000</sextant>
+			<sextant pos="0">48,255,48</sextant>
+			<sextant pos="1">255,166,77</sextant>
+			<sextant pos="2">255,61,1</sextant>
+			<sextant pos="3">48,255,48</sextant>
+			<sextant pos="4">255,166,77</sextant>
+			<sextant pos="5">255,61,1</sextant>
 		</colours>
 		<timezone>
 			<label>local</label>
@@ -75,7 +74,6 @@
 			<sextant pos="3">#ffff00</sextant>
 			<sextant pos="4">#ff8800</sextant>
 			<sextant pos="5">#ff8800</sextant>
-			<sextant pos="6">#ff0000</sextant>
 		</colours>
 		<timezone>
 			<label>UTC</label>
@@ -103,7 +101,6 @@
 			<sextant pos="3">#ffff00</sextant>
 			<sextant pos="4">#ff8800</sextant>
 			<sextant pos="5">#ff8800</sextant>
-			<sextant pos="6">#ff0000</sextant>
 		</colours>
 		<timezone>
 			<label>Paris</label>
@@ -131,7 +128,6 @@
 			<sextant pos="3">#ffff00</sextant>
 			<sextant pos="4">#ff8800</sextant>
 			<sextant pos="5">#ff8800</sextant>
-			<sextant pos="6">#ff0000</sextant>
 		</colours>
 		<timezone>
 			<label>Delhi</label>

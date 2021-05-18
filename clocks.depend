@@ -3118,3 +3118,6 @@
 
 1546487181 /usr/include/wx-3.0/wx/gtk/menu.h
 
+1621010116 source:/home/pi/StudioClocks/resource.rc
+	"wx/msw/wx.rc"
+
