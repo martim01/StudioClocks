@@ -4,6 +4,8 @@
 #include <wx/dcmemory.h>
 #include <wx/log.h>
 
+/** Based on code written by Jos de Jong **/
+
 using namespace std;
 
 // StudioClock
@@ -118,7 +120,7 @@ void StudioClock::PaintNormalClock(wxBufferedPaintDC& dc)
 
     wxSize sz = GetClientSize();
 
-    wxPoint center = wxPoint(sz.x / 2, sz.y / 2);
+    wxPoint pntCenter = wxPoint(sz.x / 2, sz.y / 2);
     wxCoord radius = wxMin(sz.x / 2 - 20, sz.y / 2 - 20);
     radius = wxMax(radius, 30);
 
@@ -132,12 +134,12 @@ void StudioClock::PaintNormalClock(wxBufferedPaintDC& dc)
     // draw clock border
     dc.SetPen(wxPen(m_clrAnalogueFront));
     dc.SetBrush(wxBrush(m_clrAnalogueFront));
-    dc.DrawCircle(center, radius);
+    dc.DrawCircle(pntCenter, radius);
     dc.SetPen(wxPen(m_clrAnalogueBack));
     dc.SetBrush(wxBrush(m_clrAnalogueBack));
 
 
-    dc.DrawCircle(center, static_cast<int>(radius - 1.0 * factor));
+    dc.DrawCircle(pntCenter, static_cast<int>(radius - 1.0 * factor));
 
     // paint lines for minutes
     float pi = 3.141592654;
@@ -157,7 +159,7 @@ void StudioClock::PaintNormalClock(wxBufferedPaintDC& dc)
         dc.SetPen(wxPen(m_clrAnalogueFront, linewidth));
         wxPoint outer = wxPoint(static_cast<int>(r_outer * s), static_cast<int>(r_outer * c));
         wxPoint inner = wxPoint(static_cast<int>(r_inner_min * s), static_cast<int>(r_inner_min * c));
-        dc.DrawLine(center + inner, center + outer);
+        dc.DrawLine(pntCenter + inner, pntCenter + outer);
 
         if (r % 5 == 0)
         {
@@ -167,7 +169,7 @@ void StudioClock::PaintNormalClock(wxBufferedPaintDC& dc)
             // paint larger lines for the hours
             outer = wxPoint(static_cast<int>(r_outer * s), static_cast<int>(r_outer * c));
             inner = wxPoint(static_cast<int>(r_inner_hour * s), static_cast<int>(r_inner_hour * c));
-            dc.DrawLine(center + inner, center + outer);
+            dc.DrawLine(pntCenter + inner, pntCenter + outer);
 
             // paint value of the hour
             if(m_bShowHours)
@@ -184,7 +186,7 @@ void StudioClock::PaintNormalClock(wxBufferedPaintDC& dc)
                     dc.SetFont(wxFont(static_cast<int>(4 * factor), wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD, false, "tahoma", wxFONTENCODING_DEFAULT));
                     dc.GetTextExtent(hour24, &w, &h);
                     wxPoint text_pos = wxPoint(static_cast<int>(r_inner_text24 * s - w / 2), static_cast<int>(r_inner_text24 * c - h / 2));
-                    dc.DrawText(hour24, center + text_pos);
+                    dc.DrawText(hour24, pntCenter + text_pos);
                 }
 
                 dc.SetTextForeground(m_clrAnalogueHour);
@@ -196,7 +198,7 @@ void StudioClock::PaintNormalClock(wxBufferedPaintDC& dc)
 
                 dc.GetTextExtent(hour, &w, &h);
                 wxPoint text_pos = wxPoint(static_cast<int>(r_inner_text * s - w / 2), static_cast<int>(r_inner_text * c - h / 2));
-                dc.DrawText(hour, center + text_pos);
+                dc.DrawText(hour, pntCenter + text_pos);
 
 
             }
@@ -208,7 +210,7 @@ void StudioClock::PaintNormalClock(wxBufferedPaintDC& dc)
     wxDateTime time = GetClockTime();
 
 
-    PaintDigits(dc, factor, center, time, false);
+    PaintDigits(dc, factor, pntCenter, time, false);
 
 
     int h = time.GetHour();
@@ -217,13 +219,12 @@ void StudioClock::PaintNormalClock(wxBufferedPaintDC& dc)
     int ms = time.GetMillisecond();
 
     int r = 1;
-/*    int h_deg = static_cast<int>((h % 12) / 12.0 * 360);
-    int m_deg = static_cast<int>(m / 60.0 * 360.0);
-    int s_deg = static_cast<int>(s / 60.0 * 360.0);*/
+
     float h_rad = (h % 12 + m / 60.0 + s / 3600.0) / 12.0 * 2.0 * pi;
     float m_rad = (m / 60.0 + s / 3600.0 + ms /3600000.0) * 2.0 * pi;
     float s_rad;
-    if(m_timer.GetInterval() < 500)
+
+    if(m_nRefreshType == SWEEP)
     {
          s_rad = (s / 60.0 + ms/60000.0) * 2.0 * pi;
     }
@@ -235,22 +236,22 @@ void StudioClock::PaintNormalClock(wxBufferedPaintDC& dc)
     r = static_cast<int>(factor * 35);
     linewidth = wxMax(static_cast<int>(factor * 3), 1);
     dc.SetPen(wxPen(m_clrAnalogueHands, linewidth));
-    dc.DrawLine(center, center + wxPoint(static_cast<int>(r * sin(h_rad)), static_cast<int>(r * -cos(h_rad))));
+    dc.DrawLine(pntCenter, pntCenter + wxPoint(static_cast<int>(r * sin(h_rad)), static_cast<int>(r * -cos(h_rad))));
 
     r = static_cast<int>(factor * 45);
     linewidth = wxMax(static_cast<int>(factor * 2), 1);
     dc.SetPen(wxPen(m_clrAnalogueHands, linewidth));
-    dc.DrawLine(center, center + wxPoint(static_cast<int>(r * sin(m_rad)), static_cast<int>(r * -cos(m_rad))));
+    dc.DrawLine(pntCenter, pntCenter + wxPoint(static_cast<int>(r * sin(m_rad)), static_cast<int>(r * -cos(m_rad))));
 
     r = static_cast<int>(factor * 50);
     linewidth = wxMax(static_cast<int>(factor), 1);
     dc.SetPen(wxPen(m_clrAnalogueSecondHand, linewidth));
-    dc.DrawLine(center, center + wxPoint(static_cast<int>(r * sin(s_rad)), static_cast<int>(r * -cos(s_rad))));
-    dc.DrawLine(center, center - wxPoint(static_cast<int>(r/6 * sin(s_rad)), static_cast<int>(r/6 * -cos(s_rad))));
+    dc.DrawLine(pntCenter, pntCenter + wxPoint(static_cast<int>(r * sin(s_rad)), static_cast<int>(r * -cos(s_rad))));
+    dc.DrawLine(pntCenter, pntCenter - wxPoint(static_cast<int>(r/6 * sin(s_rad)), static_cast<int>(r/6 * -cos(s_rad))));
 
     dc.SetPen(m_clrAnalogueFront);
     dc.SetBrush(m_clrAnalogueFront);
-    dc.DrawCircle(center, factor * 2);
+    dc.DrawCircle(pntCenter, factor * 2);
 
 }
 
@@ -261,7 +262,7 @@ void StudioClock::PaintStudioClock(wxBufferedPaintDC& dc)
     // Get window dimensions
     wxSize sz = GetClientSize();
 
-    wxPoint center = wxPoint(sz.x / 2, sz.y / 2);
+    wxPoint pntCenter = wxPoint(sz.x / 2, sz.y / 2);
     wxCoord radius = wxMin(sz.x / 2 - 20, sz.y / 2 - 20);
     radius = wxMax(radius, 50);
 
@@ -274,17 +275,12 @@ void StudioClock::PaintStudioClock(wxBufferedPaintDC& dc)
 
     // paint lines for minutes
     float pi = 3.141592654;
-    float r_outer = radius - 5 * factor;
     float r_inner_min = radius - 7 * factor;
     float r_inner_hour = radius - 10 * factor;
-    float r_inner_text = radius - 15 * factor;
-    int linewidth = 1;
 
     // draw hour, minute and second hand of the clock
     wxDateTime time = GetClockTime();
 
-    int nHour = time.GetHour();
-    int nMin = time.GetMinute();
     int nSec = time.GetSecond();
 
     for (int r = 0; r < 60; r ++)
@@ -304,7 +300,7 @@ void StudioClock::PaintStudioClock(wxBufferedPaintDC& dc)
             dc.SetBrush(m_arrInActive[(r)/10]);
         }
         wxPoint outer = wxPoint(static_cast<int>(r_outer * s), static_cast<int>(r_outer * c));
-        dc.DrawCircle(center+outer, factor*2);
+        dc.DrawCircle(pntCenter+outer, factor*2);
 
         if (r % 5 == 0)
         {
@@ -312,14 +308,14 @@ void StudioClock::PaintStudioClock(wxBufferedPaintDC& dc)
             dc.SetBrush(m_arrActive[(r)/10]);
             // paint larger lines for the hours
             wxPoint inner = wxPoint(static_cast<int>(r_inner_hour * s), static_cast<int>(r_inner_hour * c));
-            dc.DrawCircle(center+inner, factor*2);
+            dc.DrawCircle(pntCenter+inner, factor*2);
         }
     }
 
-    PaintDigits(dc, factor, center, time, true);
+    PaintDigits(dc, factor, pntCenter, time, true);
 }
 
-void StudioClock::PaintDigits(wxBufferedPaintDC& dc, float factor, const wxPoint& center, const wxDateTime& time, bool bShowHM)
+void StudioClock::PaintDigits(wxBufferedPaintDC& dc, float factor, const wxPoint& pntCenter, const wxDateTime& time, bool bShowHM)
 {
     dc.SetTextForeground(m_clrText);
 
@@ -330,25 +326,25 @@ void StudioClock::PaintDigits(wxBufferedPaintDC& dc, float factor, const wxPoint
     wxCoord w = 0, h = 0;
     dc.GetTextExtent(sTime, &w, &h);
 
-    int nHourBottom = center.y+h/2;
-    int nHourTop = center.y-h/2;
+    int nHourBottom = pntCenter.y+h/2;
+    int nHourTop = pntCenter.y-h/2;
     if(bShowHM)
     {
-        dc.DrawText(sTime, center.x-w/2, center.y-h/2);
+        dc.DrawText(sTime, pntCenter.x-w/2, pntCenter.y-h/2);
     }
 
     if(m_bShowSeconds)
     {
         dc.SetFont(wxFont(static_cast<int>(12 * factor), wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, "tahoma", wxFONTENCODING_DEFAULT));
         dc.GetTextExtent(sSec, &w, &h);
-        dc.DrawText(sSec, center.x-w/2, nHourBottom);
+        dc.DrawText(sSec, pntCenter.x-w/2, nHourBottom);
     }
 
     if(m_bShowTimezone)
     {
         dc.SetFont(wxFont(static_cast<int>(8 * factor), wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, "tahoma", wxFONTENCODING_DEFAULT));
         dc.GetTextExtent(m_sTimeZoneLabel, &w, &h);
-        dc.DrawText(m_sTimeZoneLabel, center.x-w/2, nHourTop-h);
+        dc.DrawText(m_sTimeZoneLabel, pntCenter.x-w/2, nHourTop-h);
     }
 }
 
