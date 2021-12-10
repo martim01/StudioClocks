@@ -25,7 +25,7 @@ class clocksFrame: public wxFrame
 {
     public:
 
-        clocksFrame(wxWindow* parent,wxWindowID id = -1);
+        clocksFrame(wxWindow* parent, const wxString& sPath, wxWindowID id = -1);
         virtual ~clocksFrame();
 
         void LoadClocks(const wxFileName& fn);

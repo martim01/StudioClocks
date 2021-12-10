@@ -16,6 +16,11 @@ class clocksApp : public wxApp
 {
     public:
         virtual bool OnInit();
+        void OnInitCmdLine(wxCmdLineParser& parser);
+        bool OnCmdLineParsed(wxCmdLineParser& parser);
+
+    private:
+        wxString m_sPath;
 };
 
 #endif // CLOCKSAPP_H

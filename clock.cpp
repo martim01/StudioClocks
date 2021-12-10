@@ -3,7 +3,7 @@
 #include <list>
 #include <wx/dcmemory.h>
 #include <wx/log.h>
-
+#include "blank.xpm"
 /** Based on code written by Jos de Jong **/
 
 using namespace std;
@@ -14,9 +14,6 @@ IMPLEMENT_DYNAMIC_CLASS(StudioClock, wxWindow)
 #else
 wxIMPLEMENT_DYNAMIC_CLASS(StudioClock, wxWindow);
 #endif // WXSPAM
-
-
-
 
 
 StudioClock::StudioClock()
@@ -58,7 +55,6 @@ StudioClock::StudioClock(wxWindow *parent, wxWindowID id, const wxPoint& pos, co
 
     wxWindow::Create(parent,id,pos,szInit,wxWANTS_CHARS, wxT("StudioClock"));
 
-    wxSetCursor(wxCURSOR_BLANK);
 
     m_timer.SetOwner(this);
 
@@ -74,13 +70,16 @@ StudioClock::StudioClock(wxWindow *parent, wxWindowID id, const wxPoint& pos, co
 
     SetStudioColourGAR();
 
-
     Connect(wxEVT_PAINT, (wxObjectEventFunction)&StudioClock::OnPaint);
     Connect(wxEVT_SIZE, (wxObjectEventFunction)&StudioClock::OnSize);
     Connect(wxID_ANY, wxEVT_TIMER,(wxObjectEventFunction)&StudioClock::OnTimer);
 
 
     SetRefreshType(m_nRefreshType);
+
+    //wxCursor blank = wxCursor(wxImage(blank_xpm));
+    //SetCursor(blank);
+
 }
 
 StudioClock::~StudioClock()
@@ -101,6 +100,7 @@ void StudioClock::OnPaint(wxPaintEvent& event)
             PaintStudioClock(dc);
             break;
     }
+
 }
 
 wxDateTime StudioClock::GetClockTime()

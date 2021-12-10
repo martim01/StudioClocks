@@ -13,21 +13,38 @@
 #include "clocksMain.h"
 #include <wx/image.h>
 //*)
+#include <wx/cmdline.h>
 
 IMPLEMENT_APP(clocksApp);
 
+void clocksApp::OnInitCmdLine(wxCmdLineParser& parser)
+{
+	parser.SetLogo(wxT("Clocks"));
+	parser.AddParam(wxT("Path"));
+
+}
+
+bool clocksApp::OnCmdLineParsed(wxCmdLineParser& parser)
+{
+	m_sPath = parser.GetParam(0);
+
+	return true;
+}
+
+
 bool clocksApp::OnInit()
 {
-    //(*AppInitialize
+    if(!wxApp::OnInit())
+		return false;
+
     bool wxsOK = true;
     wxInitAllImageHandlers();
     if ( wxsOK )
     {
-    	clocksFrame* Frame = new clocksFrame(0);
+    	clocksFrame* Frame = new clocksFrame(0, m_sPath);
     	Frame->Show();
     	SetTopWindow(Frame);
     }
-    //*)
     return wxsOK;
 
 }

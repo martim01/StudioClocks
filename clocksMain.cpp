@@ -12,6 +12,7 @@
 #include <wx/tokenzr.h>
 #include <wx/msgdlg.h>
 #include <wx/log.h>
+#include "blank.xpm"
 //(*InternalHeaders(clocksFrame)
 #include <wx/intl.h>
 #include <wx/string.h>
@@ -52,7 +53,7 @@ BEGIN_EVENT_TABLE(clocksFrame,wxFrame)
     //*)
 END_EVENT_TABLE()
 
-clocksFrame::clocksFrame(wxWindow* parent,wxWindowID id)
+clocksFrame::clocksFrame(wxWindow* parent,const wxString& sPath, wxWindowID id)
 {
     //(*Initialize(clocksFrame)
     Create(parent, id, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxRESIZE_BORDER|wxNO_BORDER, _T("id"));
@@ -71,17 +72,28 @@ clocksFrame::clocksFrame(wxWindow* parent,wxWindowID id)
 
 
 
-    #if defined(__WXGTK__)
-    wxSetCursor(wxCURSOR_BLANK);
-    #elif defined(__WXMSW__)
-    ShowCursor(0);
-    #endif // defined
+//    #if defined(__WXGTK__)
+//    SetCursor(wxCURSOR_BLANK);
+//    #elif defined(__WXMSW__)
+//    ShowCursor(0);
+//    #endif // defined
 
 
-    wxFileName fn(".", "clocks.xml");
+    wxFileName fn(sPath, "clocks.xml");
     LoadClocks(fn);
 
     SetSize(1920,1080);
+
+    wxImage img(16,16);
+    img.SetRGB(wxRect(0,0,16,16),0,0,0);
+    img.SetMaskColour(0,0,0);
+    img.SetOption(wxIMAGE_OPTION_CUR_HOTSPOT_X,1);
+    img.SetOption(wxIMAGE_OPTION_CUR_HOTSPOT_Y,1);
+    m_pCursor = new wxCursor(img);
+
+    wxSetCursor(*wxSTANDARD_CURSOR);
+    wxSetCursor(*m_pCursor);
+
 }
 
 clocksFrame::~clocksFrame()
