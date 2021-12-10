@@ -62,7 +62,7 @@
 				<Option object_output="obj/Release/" />
 				<Option type="0" />
 				<Option compiler="gcc" />
-				<Option parameters="/boot" />
+				<Option parameters="/home/matt/StudioClocks" />
 				<Option projectLinkerOptionsRelation="2" />
 				<Compiler>
 					<Add option="-O2" />
@@ -132,9 +132,6 @@
 		</Unit>
 		<Unit filename="wxsmith/clocksframe.wxs" />
 		<Extensions>
-			<code_completion />
-			<envvars />
-			<debugger />
 			<wxsmith version="1">
 				<gui name="wxWidgets" src="clocksApp.cpp" main="clocksFrame" init_handlers="necessary" language="CPP" />
 				<resources>

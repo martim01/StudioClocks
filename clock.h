@@ -58,7 +58,7 @@ public:
 
 
 
-    enum {ANALOGUE, STUDIO};
+    enum {ANALOGUE, STUDIO, DIGITAL};
 
     protected:
 
@@ -75,6 +75,7 @@ public:
 
     void PaintNormalClock(wxBufferedPaintDC& dc);
     void PaintStudioClock(wxBufferedPaintDC& dc);
+    void PaintDigitalClock(wxBufferedPaintDC& dc);
     void PaintDigits(wxBufferedPaintDC& dc, float factor, const wxPoint& center, const wxDateTime& time, bool bShowHM);
 
     wxDateTime GetClockTime();

@@ -147,6 +147,10 @@ void clocksFrame::LoadClock(wxXmlNode* pClockNode)
             {
                 pClock->SetClockMode(StudioClock::STUDIO);
             }
+            else if(pNode->GetNodeContent().CmpNoCase("digital") == 0)
+            {
+                pClock->SetClockMode(StudioClock::DIGITAL);
+            }
             else
             {
                 pClock->SetClockMode(StudioClock::ANALOGUE);

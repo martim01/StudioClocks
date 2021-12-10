@@ -3,7 +3,7 @@
 #include <list>
 #include <wx/dcmemory.h>
 #include <wx/log.h>
-#include "blank.xpm"
+
 /** Based on code written by Jos de Jong **/
 
 using namespace std;
@@ -14,6 +14,9 @@ IMPLEMENT_DYNAMIC_CLASS(StudioClock, wxWindow)
 #else
 wxIMPLEMENT_DYNAMIC_CLASS(StudioClock, wxWindow);
 #endif // WXSPAM
+
+
+
 
 
 StudioClock::StudioClock()
@@ -55,6 +58,7 @@ StudioClock::StudioClock(wxWindow *parent, wxWindowID id, const wxPoint& pos, co
 
     wxWindow::Create(parent,id,pos,szInit,wxWANTS_CHARS, wxT("StudioClock"));
 
+    wxSetCursor(wxCURSOR_BLANK);
 
     m_timer.SetOwner(this);
 
@@ -70,16 +74,13 @@ StudioClock::StudioClock(wxWindow *parent, wxWindowID id, const wxPoint& pos, co
 
     SetStudioColourGAR();
 
+
     Connect(wxEVT_PAINT, (wxObjectEventFunction)&StudioClock::OnPaint);
     Connect(wxEVT_SIZE, (wxObjectEventFunction)&StudioClock::OnSize);
     Connect(wxID_ANY, wxEVT_TIMER,(wxObjectEventFunction)&StudioClock::OnTimer);
 
 
     SetRefreshType(m_nRefreshType);
-
-    //wxCursor blank = wxCursor(wxImage(blank_xpm));
-    //SetCursor(blank);
-
 }
 
 StudioClock::~StudioClock()
@@ -99,10 +100,7 @@ void StudioClock::OnPaint(wxPaintEvent& event)
         case STUDIO:
             PaintStudioClock(dc);
             break;
-        case DIGITAL:
-            PaintDigitalClock(dc);
     }
-
 }
 
 wxDateTime StudioClock::GetClockTime()
@@ -350,40 +348,6 @@ void StudioClock::PaintDigits(wxBufferedPaintDC& dc, float factor, const wxPoint
     }
 }
 
-void StudioClock::PaintDigitalClock(wxBufferedPaintDC& dc)
-{
-    dc.SetPen(m_clrAnalogueBack);
-    dc.SetBrush(m_clrAnalogueBack);
-    dc.DrawRectangle(GetClientRect());
-
-
-    dc.SetTextForeground(m_clrText);
-
-    float factor = 5;
-    dc.SetFont(wxFont(static_cast<int>(17 * factor), wxFONTFAMILY_MODERN, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_NORMAL, false, "tahoma", wxFONTENCODING_DEFAULT));
-
-    wxDateTime time = GetClockTime();
-    wxString sTime = time.Format("%H:%M");
-    if(m_bShowSeconds)
-    {
-        sTime += time.Format(":%S");
-    }
-    if(m_bShowTimezone)
-    {
-        sTime += " " + m_sTimeZoneLabel;
-    }
-    wxCoord w = 0, h = 0;
-    dc.GetTextExtent(sTime, &w, &h);
-
-    wxPoint pntCenter;
-    pntCenter.x = GetClientRect().GetLeft() + (GetClientRect().GetWidth()/2);
-    pntCenter.y = GetClientRect().GetTop() + (GetClientRect().GetHeight()/2);
-
-    int nHourBottom = pntCenter.y+h/2;
-    int nHourTop = pntCenter.y-h/2;
-    dc.DrawText(sTime, pntCenter.x-w/2, pntCenter.y-h/2);
-}
-
 void StudioClock::SetClockMode(int nMode)
 {
     m_nMode = nMode;
@@ -523,11 +487,12 @@ void StudioClock::Tick()
     unsigned long nMilliseconds = wxDateTime::UNow().GetMillisecond();
     if(m_nRefreshType == TICK || m_nMode == STUDIO)
     {
-        m_timer.Start(1000-nMilliseconds,true);
+        m_timer.Start(1000-nMilliseconds);
     }
     else
     {
         nMilliseconds %= 50;
-        m_timer.Start(50-nMilliseconds,true);
+        m_timer.Start(50-nMilliseconds);
     }
 }
+
